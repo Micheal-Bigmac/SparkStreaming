@@ -1,5 +1,6 @@
 package streaming
 
+import java.nio.ByteBuffer
 import java.util
 import java.util.Properties
 
@@ -134,7 +135,7 @@ object DirectKafkaStreamingDemo {
     return List()
   }
 
-  def analysisBinaryData[V: ClassManifest](lines: V): (String, String, List[Array[Byte]]) = {
+  def analysisBinaryData[V: ClassTag](lines: V): (String, String, List[Array[Byte]]) = {
     val bytes: Array[Byte] = lines.asInstanceOf[Array[Byte]]
     val Data_type = new Array[Byte](4)
     System.arraycopy(bytes, 0, Data_type, 0, 4)
@@ -214,8 +215,7 @@ object DirectKafkaStreamingDemo {
     )
 
     val km = new KafkaManager(kafkaParams)
-    val messages: InputDStream[(Array[Byte], Array[Byte])] = km.createDirectStream[Array[Byte], Array[Byte], DefaultDecoder, DefaultDecoder](
-      ssc, kafkaParams, topicsSet)
+    val messages: InputDStream[(Array[Byte], Array[Byte])] = km.createDirectStream[Array[Byte], Array[Byte], DefaultDecoder, DefaultDecoder](ssc, kafkaParams, topicsSet)
 
     val lines: DStream[Array[Byte]] = messages.map(_._2)
 

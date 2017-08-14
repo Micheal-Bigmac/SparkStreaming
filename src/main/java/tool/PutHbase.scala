@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory
 class PutHbase(pro: Properties) {
   @transient
   protected var hbaseClient: HBaseClient = null
+
   val logger = LoggerFactory.getLogger(this.getClass)
   val configuration = HBaseConfiguration.create()
   hbaseClient = new HBaseClient(new util.HashMap[String, Object](), configuration, pro.getProperty("hbase.table.name.history"))

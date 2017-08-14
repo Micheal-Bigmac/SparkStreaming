@@ -4,11 +4,14 @@ import kafka.serializer.StringDecoder
 import kafka.utils.{ZKGroupTopicDirs, ZKStringSerializer, ZkUtils}
 import org.I0Itec.zkclient.ZkClient
 import org.apache.log4j.{Level, Logger}
+import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.kafka.{HasOffsetRanges, KafkaUtils, OffsetRange}
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.apache.spark.{HashPartitioner, SparkConf, TaskContext}
 import org.slf4j.LoggerFactory
+
+import scala.collection.mutable
 
 
 /***
@@ -76,12 +79,12 @@ object SparkStreamingKafkaToZK {
      iterator.flatMap(extract)
    }
 val initialRDD = ssc.sparkContext.parallelize(List(("page1", 0.00)))
-   val stateDstream = popularityData.updateStateByKey[Double](updatePopularityValue,
+   val stateDstream: DStream[(String, Double)] = popularityData.updateStateByKey[Double](updatePopularityValue,
      new HashPartitioner(ssc.sparkContext.defaultParallelism), true, initialRDD)
     //set the checkpoint interval to avoid too frequently data checkpoint which may
     //may significantly reduce operation throughput
 //    stateDstream.checkpoint(Duration(8 * 2 * 1000));
-//    stateDstream.print()
+    stateDstream.print()
 
 
 
@@ -117,7 +120,7 @@ val initialRDD = ssc.sparkContext.parallelize(List(("page1", 0.00)))
   def getKafkaParam(): Map[String, String] = {
     //    val brokers = "10.10.11.14:9092,10.10.11.15:9092,10.10.11.16:9092"
     //    val kafkaParams = Map[String, String]("metadata.broker.list" -> brokers, "serializer.class" -> "kafka.serializer.StringEncoder")
-    val param = collection.mutable.Map[String, String]()
+    val param: mutable.Map[String, String] = collection.mutable.Map[String, String]()
     param += ("bootstrap.servers" -> "10.10.11.14:9092,10.10.11.15:9092,10.10.11.16:9092")
     param += ("serializer.class" -> "kafka.serializer.StringEncoder")
     param += ("group.id" -> "test-spark")
